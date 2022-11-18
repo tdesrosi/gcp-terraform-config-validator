@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: templates.gatekeeper.sh/v1alpha1
+apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
   name: gcp-iam-allowed-bindings-v1
@@ -35,7 +35,7 @@ spec:
               items:
                 type: string
   targets:
-    validation.gcp.forsetisecurity.org:
+    - target: validation.resourcechange.terraform.cloud.google.com
       rego: | #INLINE("validator/iam_allow_ban_roles.rego")
         #
         # Copyright 2019 Google LLC
@@ -53,7 +53,7 @@ spec:
         # limitations under the License.
         #
 
-        package templates.gcp.GCPIAMAllowBanRolesConstraintV1
+        package templates.gcp.TFGCPIAMAllowBanRolesConstraintV1
 
         import data.validator.gcp.lib as lib
 
@@ -61,12 +61,33 @@ spec:
         	"msg": message,
         	"details": metadata,
         }] {
+        	# NOTE: For Terraform review object, the following schema is followed:
+        	# review: {
+        	# 	change: {
+        	# 		actions: ["create"],
+        	# 		after: {
+        	#			condition: []
+        	#			members: []
+        	#			project:
+        	# 			role: 
+        	# 		}
+        	# 	},
+        	# 	mode:
+        	# 	name: 
+        	# 	provider_name:
+        	# 	type:
+        	# }
+
+        	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
         	constraint := input.constraint
         	lib.get_constraint_params(constraint, params)
-        	asset := input.asset
 
-        	binding := asset.iam_policy.bindings[_]
-        	role := binding.role
+        	# Use input.review for TF changes (see schema above)
+        	resource := input.review[_]
+
+        	resource.type == "google_project_iam_binding"
+
+        	role := resource.change.after.role
 
         	matches_found = {r | r := role; glob.match(params.roles[_], ["/"], r)}
 
@@ -75,10 +96,10 @@ spec:
         	desired_count := target_match_count(mode)
         	count(matches_found) != desired_count
 
-        	message := output_msg(desired_count, asset.name, role)
+        	message := output_msg(desired_count, resource.name, role)
 
         	metadata := {
-        		"resource": asset.name,
+        		"resource": resource.name,
         		"role": role,
         	}
         }

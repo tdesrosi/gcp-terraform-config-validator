@@ -71,6 +71,8 @@ deny[{
 
 	message := sprintf("Role %v grants permission %v", [resource.name, asset_permissions])
 
+	trace(sprintf("Message from iam custom role permissions: %s", [message]))
+
 	metadata := {
 		"resource": resource.name,
 		"type": resource.type,

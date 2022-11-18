@@ -104,5 +104,4 @@ test_ban_one_role_violations {
 	count(ban_one_role_violations) == 1
 	violation = ban_one_role_violations[_]
 	violation.details.role == "roles/owner"
-	violation.details.resource == "//cloudresourcemanager.googleapis.com/projects/12345"
 }

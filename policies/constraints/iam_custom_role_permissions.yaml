@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPIAMCustomRolePermissionsConstraintV1
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: TFGCPIAMCustomRolePermissionsConstraintV1
 metadata:
   name: allowlist-custom-role-permissions
-  annotations:
-    description: Custom roles must only have specific permissions
 spec:
   severity: high
   parameters:

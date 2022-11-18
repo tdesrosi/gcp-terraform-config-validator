@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: constraints.gatekeeper.sh/v1alpha1
+apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: TFGCPIAMAllowBanRolesConstraintV1
 metadata:
   name: iam_allow_roles
-  annotations:
-    description: Only the roles in this list are allowed. All other roles trigger violation.
 spec:
   severity: high
   match:
@@ -29,6 +27,5 @@ spec:
     roles:
       - "roles/appengine.appViewer"
       - "roles/logging.viewer"
-      # allow all roles, use with caution
       - "roles/*"
       - "w-secteam-target-prod/roles/myCustomRole"
