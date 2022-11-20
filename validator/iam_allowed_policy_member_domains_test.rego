@@ -20,20 +20,20 @@ import data.test.fixtures.iam_allowed_policy_member_domains.assets as fixture_as
 import data.test.fixtures.iam_allowed_policy_member_domains.constraints as fixture_constraints
 
 # Find all violations on our test cases
-find_violations[violation] {
+find_violations[get_violation] {
 	instance := data.instances[_]
 	constraint := data.test_constraints[_]
 
 	# trace(sprintf("INstance: %s", [instance]))
 	# trace(sprintf("Constraint: %s", [constraint]))
 
-	issues := deny with input.review as instance
-		with input.constraint as constraint
+	issues := violation with input.review as instance
+		with input.parameters as constraint
 
 	total_issues := count(issues)
 
 	# trace(sprintf("Issues found in find_violations: %s", [issues[_]]))
-	violation := issues[_]
+	get_violation := issues[_]
 }
 
 # Confim no violations with no resources
@@ -55,10 +55,6 @@ violations_one_project[violation] {
 test_one_project_with_unexpected_domain {
 	found_violations := violations_one_project
 
-	# trace(sprintf("Issues found in find_violations: %s", [found_violations]))
-
-	# The "12345" project should have 2 members from unexpected domains.
-	# count(found_violations) = 2
 	count_viol := count(found_violations[_])
 
 	# trace(sprintf("count viol %s", [count_viol]))

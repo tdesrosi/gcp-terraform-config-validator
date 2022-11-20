@@ -16,9 +16,9 @@
 
 package templates.gcp.TFGCPIAMAllowedBindingsConstraintV3
 
-import data.validator.gcp.lib as lib
+# import data.validator.gcp.lib as lib
 
-deny[{
+violation[{
 	"msg": message,
 	"details": metadata,
 }] {
@@ -40,13 +40,17 @@ deny[{
 	# }
 
 	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-	constraint := input.constraint
-	lib.get_constraint_params(constraint, params)
+	# constraint := input.constraint
+
+	# Outdated Gatekeeper format, updating to v1beta1
+	# lib.get_constraint_params(constraint, params)
+	params := input.parameters.spec.parameters
 
 	# Use input.review for TF changes (see schema above)
 	resource := input.review[_]
 
 	resource.type == "google_project_iam_binding"
+	not resource.change.actions[0] == "delete"
 
 	# Unused, for reference only.
 	# check_asset_type(review, params)
@@ -65,7 +69,7 @@ deny[{
 	# params.role == role
 
 	# Get mode from params
-	mode := lib.get_default(params, "mode", "allowlist")
+	mode := object.get(params, "mode", "allowlist")
 
 	# Grab matches found using set arithmetic
 	matches_found = [m | m = config_pattern(params.members[_]); glob.match(m, [], member)]

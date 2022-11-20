@@ -16,9 +16,9 @@
 
 package templates.gcp.TFGCPIAMCustomRolePermissionsConstraintV1
 
-import data.validator.gcp.lib as lib
+# import data.validator.gcp.lib as lib
 
-deny[{
+violation[{
 	"msg": message,
 	"details": metadata,
 }] {
@@ -41,13 +41,23 @@ deny[{
 	# 	type:
 	# }
 
+	trace(sprintf("input object for custom role permissions: %v", [input]))
+
 	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-	constraint := input.constraint
-	lib.get_constraint_params(constraint, params)
+	# constraint := input.constraint
+
+	# Outdated Gatekeeper format, updating to v1beta1
+	# lib.get_constraint_params(constraint, params)
+	params := input.parameters.spec.parameters
+
+	# trace(sprintf("params of custom role permissions: %v", [params]))
 
 	# Use input.review for TF changes (see schema above)
 	resource := input.review
 	resource.type == "google_project_iam_custom_role"
+	not resource.change.actions[0] == "delete"
+
+	# trace(sprintf("input object for custom role permissions: %v", [input]))
 
 	# Permissions attempting to be granted (see schema above)
 	asset_permissions := resource.change.after.permissions[_]
@@ -56,13 +66,15 @@ deny[{
 	asset_title := resource.change.after.title
 
 	# Get title value, if no title, use a glob (*)
-	params_title := lib.get_default(params, "title", "*")
+	# Outdated Gatekeeper format, updating to v1beta1
+	# params_title := lib.get_default(params, "title", "*")
+	params_title := object.get(params, "title", "*")
 
 	# Will pass if glob (*), break if titles don't match otherwise
 	check_asset_title(asset_title, params_title)
 
 	# Grab mode (denylist, allowlist)
-	mode := lib.get_default(params, "mode", "allowlist")
+	mode := object.get(params, "mode", "allowlist")
 
 	# Use set operations to determine if any permissions match
 	matches_found = [m | m = config_pattern(params.permissions[_]); glob.match(m, [], asset_permissions)]

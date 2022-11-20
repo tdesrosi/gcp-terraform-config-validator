@@ -15,7 +15,7 @@
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
-  name: gcp-iam-allowed-policy-member-domains-v2
+  name: tfgcpiamallowedpolicymemberdomainsconstraintv2
 spec:
   crd:
     spec:
@@ -51,7 +51,8 @@ spec:
 
   targets:
     - target: validation.resourcechange.terraform.cloud.google.com
-      rego: | #INLINE("validator/iam_allowed_policy_member_domains.rego")
+      rego: |
+        #INLINE("validator/iam_allowed_policy_member_domains.rego")
         #
         # Copyright 2019 Google LLC
         #
@@ -67,12 +68,12 @@ spec:
         # See the License for the specific language governing permissions and
         # limitations under the License.
         #
-
+        
         package templates.gcp.TFGCPIAMAllowedPolicyMemberDomainsConstraintV2
-
-        import data.validator.gcp.lib as lib
-
-        deny[{
+        
+        # import data.validator.gcp.lib as lib
+        
+        violation[{
         	"msg": message,
         	"details": metadata,
         }] {
@@ -92,39 +93,43 @@ spec:
         	# 	provider_name:
         	# 	type:
         	# }
-
+        
         	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-        	constraint := input.constraint
-        	lib.get_constraint_params(constraint, params)
-
+        	# constraint := input.constraint
+        
+        	# Outdated Gatekeeper format, updating to v1beta1
+        	# lib.get_constraint_params(constraint, params)
+        	params := input.parameters.spec.parameters
+        
         	# Use input.review for TF changes (see schema above)
         	resource := input.review[_]
-
+        
         	# trace(sprintf("input review object: %v", [input]))
-
+        
         	resource.type == "google_project_iam_binding"
-
+        	not resource.change.actions[0] == "delete"
+        
         	unique_members := {m | m = resource.change.after.members[_]}
-        	member_type_allowlist := lib.get_default(params, "member_type_allowlist", ["projectOwner", "projectEditor", "projectViewer"])
-
+        	member_type_allowlist := object.get(params, "member_type_allowlist", ["projectOwner", "projectEditor", "projectViewer"])
+        
         	members_to_check := [m | m = unique_members[_]; not starts_with_allowlisted_type(member_type_allowlist, m)]
-
+        
         	member := members_to_check[_]
-
-        	allow_sub_domains := lib.get_default(params, "allow_sub_domains", true)
-
+        
+        	allow_sub_domains := object.get(params, "allow_sub_domains", true)
+        
         	no_match_found := matched_domains(allow_sub_domains, params.domains, member)
-
+        
         	# trace(sprintf("What's the value of no_match_found variable?: %s", [no_match_found]))
-
+        
         	# trace(sprintf("IAM policy for %v contains member from unexpected domain: %v", [resource.title, member]))
-
+        
         	no_match_found == 0
-
+        
         	message := sprintf("IAM policy for %v contains member from unexpected domain: %v", [resource.name, member])
-
+        
         	# trace(sprintf("message (msg): %v", [message]))
-
+        
         	metadata := {
         		"resource": resource.name,
         		"member": member,
@@ -132,20 +137,20 @@ spec:
         	}
         	# trace(sprintf("Metadata: %v", [metadata]))
         }
-
+        
         # Returns count of matched domains between constraint params and members
         matched_domains(allow_sub_domains, domains, member) = matched_domains_count {
         	allow_sub_domains == true
         	matched_domains := [m | m = member; regex.match(sprintf("[:@.]%v$", [domains[_]]), member)]
         	matched_domains_count := count(matched_domains)
         }
-
+        
         matched_domains(allow_sub_domains, domains, member) = matched_domains_count {
         	allow_sub_domains == false
         	matched_domains := [m | m = member; regex.match(sprintf("[:@]%v$", [domains[_]]), member)]
         	matched_domains_count := count(matched_domains)
         }
-
+        
         # Determines if the member starts with allowlisted type of member (optional param)
         starts_with_allowlisted_type(allowlist, member) {
         	member_type := allowlist[_]

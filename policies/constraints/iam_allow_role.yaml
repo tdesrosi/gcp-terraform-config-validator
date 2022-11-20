@@ -15,7 +15,7 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: TFGCPIAMAllowBanRolesConstraintV1
 metadata:
-  name: iam_allow_roles
+  name: iam-allow-roles
 spec:
   severity: high
   match:
@@ -23,7 +23,7 @@ spec:
       - "organizations/**"
     exclude: [] # optional, default is no exclusions
   parameters:
-    mode: "allow"
+    mode: "ban"
     roles:
       - "roles/appengine.appViewer"
       - "roles/logging.viewer"

@@ -1,7 +1,7 @@
-apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPIAMAllowedPolicyMemberDomainsConstraintV2
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: TFGCPIAMAllowedPolicyMemberDomainsConstraintV2
 metadata:
-  name: allow_everything
+  name: allow-everything
 spec:
   severity: high
   parameters:

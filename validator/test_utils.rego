@@ -19,15 +19,15 @@ package validator.test_utils
 get_test_violations(test_assets, test_constraints, test_template) = violations {
 	# trace(sprintf("test_assets: %s", [test_assets]))
 	# trace(sprintf("test_constraints: %s", [test_constraints]))
+
 	# trace(sprintf("test_template: %s", [test_template]))
-	violations := [violation |
-		violations := data.templates.gcp[test_template].deny with input.review as test_assets[_]
-			with input.constraint as test_constraints[_]
+	violations := [v |
+		violations := data.templates.gcp[test_template].violation with input.review as test_assets[_]
+			with input.parameters as test_constraints[_]
 
-		violation := violations[_]
+		v := violations[_]
 	]
-
-	trace(sprintf("violations %s", [violations]))
+	# trace(sprintf("Violations from test %v: %v", [test_template, violations[_]]))
 }
 
 check_test_violations_count(test_assets, test_constraints, test_template, expected_count) {
@@ -51,11 +51,15 @@ check_test_violations_metadata(test_assets, test_constraints, test_template, fie
 	# trace(sprintf("test_constraints: %s", [test_constraints]))
 	# trace(sprintf("test_template: %s", [test_template]))
 	# trace(sprintf("field_name: %s", [field_name]))
-	trace(sprintf("field_values: %s", [field_values]))
+	# trace(sprintf("field_values: %s", [field_values]))
 
 	violations := get_test_violations(test_assets, test_constraints, test_template)
-	trace(sprintf("violations: %s", [violations]))
+
+	# trace(sprintf("Violations from test %v: %v", [test_template, violations]))
+
+	# trace(sprintf("violations: %s", [violations]))
 	resource_names := {x | x = violations[_].details[field_name]}
+
 	trace(sprintf("resource_names: %s", [resource_names]))
 	resource_names == field_values
 }

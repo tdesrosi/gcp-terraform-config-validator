@@ -45,9 +45,9 @@ test_allowlist_role_domain_violation_count {
 
 test_allowlist_role_domain_violations {
 	violations := test_utils.get_test_violations(fixture_assets, [fixture_constraints.iam_allowed_bindings_allowlist_role_domain], template_name)
-	violation := violations[_]
-	violation.details.role == "roles/owner"
-	violation.details.member == "user:evil@notgoogle.com"
+	deny_ruling := violations[_]
+	deny_ruling.details.role == "roles/owner"
+	deny_ruling.details.member == "user:evil@notgoogle.com"
 }
 
 # Test allowlist role members (no violations)

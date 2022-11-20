@@ -1,7 +1,7 @@
 apiVersion: constraints.gatekeeper.sh/v1alpha1
-kind: GCPIAMAllowedPolicyMemberDomainsConstraintV2
+kind: TFGCPIAMAllowedPolicyMemberDomainsConstraintV2
 metadata:
-  name: reject_project_reference
+  name: reject-project-reference
 spec:
   severity: high
   parameters:

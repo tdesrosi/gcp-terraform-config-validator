@@ -20,16 +20,16 @@ import data.test.fixtures.iam_allow_ban_roles.assets as fixture_assets
 import data.test.fixtures.iam_allow_ban_roles.constraints as fixture_constraints
 
 # Find all violations on our test cases
-find_violations[violation] {
+find_violations[get_violation] {
 	asset := fixture_assets[_]
 	constraint := data.test_constraints[_]
 
-	issues := deny with input.review as asset
-		with input.constraint as constraint
+	issues := violation with input.review as asset
+		with input.parameters as constraint
 
 	total_issues := count(issues)
 
-	violation := issues[_]
+	get_violation := issues[_]
 }
 
 allow_all_roles_non_wildcard_violations[violation] {
@@ -102,6 +102,7 @@ ban_one_role_violations[violation] {
 
 test_ban_one_role_violations {
 	count(ban_one_role_violations) == 1
-	violation = ban_one_role_violations[_]
-	violation.details.role == "roles/owner"
+	deny_ruling = ban_one_role_violations[_]
+	sprintf("violation in test ban one role violations %v", [deny_ruling])
+	deny_ruling.details.role == "roles/owner"
 }

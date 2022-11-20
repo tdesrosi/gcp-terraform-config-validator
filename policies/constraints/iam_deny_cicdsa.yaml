@@ -1,7 +1,7 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
 kind: TFGCPIAMAllowedBindingsConstraintV3
 metadata:
-  name: deny_cicdsa
+  name: deny-cicdsa
   annotations:
     description: Prevent additional role grants to cicd service accounts
     bundles.validator.forsetisecurity.org/scorecard-v1: security

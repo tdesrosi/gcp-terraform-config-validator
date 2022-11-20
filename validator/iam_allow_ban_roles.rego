@@ -16,9 +16,9 @@
 
 package templates.gcp.TFGCPIAMAllowBanRolesConstraintV1
 
-import data.validator.gcp.lib as lib
+# import data.validator.gcp.lib as lib
 
-deny[{
+violation[{
 	"msg": message,
 	"details": metadata,
 }] {
@@ -40,19 +40,23 @@ deny[{
 	# }
 
 	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-	constraint := input.constraint
-	lib.get_constraint_params(constraint, params)
+	# constraint := input.constraint
+
+	# Outdated Gatekeeper format, updating to v1beta1
+	# lib.get_constraint_params(constraint, params)
+	params := input.parameters.spec.parameters
 
 	# Use input.review for TF changes (see schema above)
 	resource := input.review[_]
 
 	resource.type == "google_project_iam_binding"
+	not resource.change.actions[0] == "delete"
 
 	role := resource.change.after.role
 
 	matches_found = {r | r := role; glob.match(params.roles[_], ["/"], r)}
 
-	mode := lib.get_default(params, "mode", "allow")
+	mode := object.get(params, "mode", "allow")
 
 	desired_count := target_match_count(mode)
 	count(matches_found) != desired_count
@@ -86,5 +90,3 @@ output_msg(0, asset_name, role) = msg {
 output_msg(1, asset_name, role) = msg {
 	msg := sprintf("%v is NOT in the allowed list of IAM policy for %v", [role, asset_name])
 }
-
-#ENDINLINE

@@ -16,9 +16,9 @@
 
 package templates.gcp.TFGCPIAMAllowedPolicyMemberDomainsConstraintV2
 
-import data.validator.gcp.lib as lib
+# import data.validator.gcp.lib as lib
 
-deny[{
+violation[{
 	"msg": message,
 	"details": metadata,
 }] {
@@ -40,8 +40,11 @@ deny[{
 	# }
 
 	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-	constraint := input.constraint
-	lib.get_constraint_params(constraint, params)
+	# constraint := input.constraint
+
+	# Outdated Gatekeeper format, updating to v1beta1
+	# lib.get_constraint_params(constraint, params)
+	params := input.parameters.spec.parameters
 
 	# Use input.review for TF changes (see schema above)
 	resource := input.review[_]
@@ -49,15 +52,16 @@ deny[{
 	# trace(sprintf("input review object: %v", [input]))
 
 	resource.type == "google_project_iam_binding"
+	not resource.change.actions[0] == "delete"
 
 	unique_members := {m | m = resource.change.after.members[_]}
-	member_type_allowlist := lib.get_default(params, "member_type_allowlist", ["projectOwner", "projectEditor", "projectViewer"])
+	member_type_allowlist := object.get(params, "member_type_allowlist", ["projectOwner", "projectEditor", "projectViewer"])
 
 	members_to_check := [m | m = unique_members[_]; not starts_with_allowlisted_type(member_type_allowlist, m)]
 
 	member := members_to_check[_]
 
-	allow_sub_domains := lib.get_default(params, "allow_sub_domains", true)
+	allow_sub_domains := object.get(params, "allow_sub_domains", true)
 
 	no_match_found := matched_domains(allow_sub_domains, params.domains, member)
 

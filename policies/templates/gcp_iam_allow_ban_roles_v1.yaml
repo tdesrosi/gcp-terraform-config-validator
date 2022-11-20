@@ -15,7 +15,7 @@
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
-  name: gcp-iam-allowed-bindings-v1
+  name: tfgcpiamallowbanrolesconstraintv1
 spec:
   crd:
     spec:
@@ -36,7 +36,8 @@ spec:
                 type: string
   targets:
     - target: validation.resourcechange.terraform.cloud.google.com
-      rego: | #INLINE("validator/iam_allow_ban_roles.rego")
+      rego: |
+        #INLINE("validator/iam_allow_ban_roles.rego")
         #
         # Copyright 2019 Google LLC
         #
@@ -52,12 +53,12 @@ spec:
         # See the License for the specific language governing permissions and
         # limitations under the License.
         #
-
+        
         package templates.gcp.TFGCPIAMAllowBanRolesConstraintV1
-
-        import data.validator.gcp.lib as lib
-
-        deny[{
+        
+        # import data.validator.gcp.lib as lib
+        
+        violation[{
         	"msg": message,
         	"details": metadata,
         }] {
@@ -77,54 +78,56 @@ spec:
         	# 	provider_name:
         	# 	type:
         	# }
-
+        
         	# input.constraint is the same for TF validate as CAI validate (comes from the constraint.yaml)
-        	constraint := input.constraint
-        	lib.get_constraint_params(constraint, params)
-
+        	# constraint := input.constraint
+        
+        	# Outdated Gatekeeper format, updating to v1beta1
+        	# lib.get_constraint_params(constraint, params)
+        	params := input.parameters.spec.parameters
+        
         	# Use input.review for TF changes (see schema above)
         	resource := input.review[_]
-
+        
         	resource.type == "google_project_iam_binding"
-
+        	not resource.change.actions[0] == "delete"
+        
         	role := resource.change.after.role
-
+        
         	matches_found = {r | r := role; glob.match(params.roles[_], ["/"], r)}
-
-        	mode := lib.get_default(params, "mode", "allow")
-
+        
+        	mode := object.get(params, "mode", "allow")
+        
         	desired_count := target_match_count(mode)
         	count(matches_found) != desired_count
-
+        
         	message := output_msg(desired_count, resource.name, role)
-
+        
         	metadata := {
         		"resource": resource.name,
         		"role": role,
         	}
         }
-
+        
         ###########################
         # Rule Utilities
         ###########################
-
+        
         # Determine the overlap between matches under test and constraint
         target_match_count(mode) = 0 {
         	mode == "ban"
         }
-
+        
         target_match_count(mode) = 1 {
         	mode == "allow"
         }
-
+        
         # Output message based on type of violation
         output_msg(0, asset_name, role) = msg {
         	msg := sprintf("%v is in the banned list of IAM policy for %v", [role, asset_name])
         }
-
+        
         output_msg(1, asset_name, role) = msg {
         	msg := sprintf("%v is NOT in the allowed list of IAM policy for %v", [role, asset_name])
         }
-
-        #ENDINLINE
         #ENDINLINE
