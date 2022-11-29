@@ -1,14 +1,24 @@
 # Config Validator Policy Library
 
-## [Bundles](./docs/index.md#policy-bundles) | [Templates](./docs/index.md#available-templates) | [Sample Constraints](./docs/index.md#sample-constraints)
+This repo contains a library of constraint templates and sample constraints to be used for Terraform resource change requests. If you're looking for the CAI variant, please see [Config Validator](https://github.com/lykaasegura/w-secteam-repo).
 
-## *README TO BE UPDATED - DISREGARD CURRENT README*
+Everything in this repository has been developed as a parallel to CAI Config Validator. The difference is that the Constraint/Template schemas target `validation.resourcechange.terraform.cloud.google.com` instead of `validation.gcp.forsetisecurity.org`. This ensures that the policies only target terraform resource changes, instead of the entire CAI metadata library from a project, folder, or organization. Use this when you intend to validate changes, rather than declaratively manage a GCP cloud environment.
 
-This repo contains a library of constraint templates and sample constraints.
+## User Guide
 
-For information on setting up Config Validator to secure your environment, see the [User Guide](./docs/user_guide.md).
+See [docs/user_guide.md](docs/user_guide.md) for information on how to use this library. **(NOTE: This is currently not up to date for this policy library.)**
 
-## Initializing a policy library
+## General Differences
+
+This library is intended to validate terraform plan resources. Therefore, as mentioned, the target has been swapped from `validation.gcp.forsetisecurity.org` to `validation.resourcechange.terraform.cloud.google.com`. This also means that the Constraint and ConstraintTemplate definitions have also had to be changed from Gatekeeper API version `v1alpha1` to `v1beta1`, as this functionality is currently under development. As a result, the Rego policy language has also had to change. If you user CAI Constraints and Templates (ie. v1apha1 Constraints/Templates), those inlined Rego policies **will not work.**
+
+You can check out documentation on how to create terraform policies in the [`gcloud terraform beta vet` documentation](https://cloud.google.com/docs/terraform/policy-validation/create-terraform-constraints).
+
+## Working with this policy library
+
+The operation of this library is similar with the CAI library, as the development flow with Make and other tools has proven to be quite efficient and helpful. Therefore, here is the relevant documentation required to get this library working for your needs.
+
+### Initializing a policy library
 
 You can easily set up a new (local) policy library by downloading a [bundle](./docs/index.md#policy-bundles) using [kpt](https://kpt.dev/).
 
@@ -24,12 +34,12 @@ kpt fn source policy-library/samples/ | \
 
 Once you have initialized a library, you might want to save it to [git](./docs/user_guide.md#https://github.com/GoogleCloudPlatform/policy-library/blob/master/docs/user_guide.md#get-started-with-the-policy-library-repository).
 
-## Developing a Constraint
+### Developing a Constraint
 
 If this library doesn't contain a constraint that matches your use case, you can develop a new one
 using the [Constraint Template Authoring Guide](./docs/constraint_template_authoring.md).
 
-### Available Commands
+#### Available Commands
 
 ```
 make audit                          Run audit against real CAI dump data
@@ -41,7 +51,7 @@ make help                           Prints help for targets with comments
 make test                           Test constraint templates via OPA
 ```
 
-### Inlining
+#### Inlining
 
 You can run `make build` to automatically inline Rego rules into your constraint templates.
 
@@ -66,7 +76,7 @@ Replaced:
 #ENDINLINE
 ```
 
-### Linting Policies
+#### Linting Policies
 
 Config Validator provides a policy linter.  You can invoke it as:
 
@@ -75,7 +85,7 @@ go get github.com/GoogleCloudPlatform/config-validator/cmd/policy-tool
 policy-tool --policies ./policies --policies ./samples --libs ./lib
 ```
 
-### Local CI
+#### Local CI
 
 You can run the cloudbuild CI locally as follows:
 
@@ -84,7 +94,7 @@ gcloud components install cloud-build-local
 cloud-build-local --config ./cloudbuild.yaml --dryrun=false .
 ```
 
-### Updating CI Images
+#### Updating CI Images
 
 You can update the CI images to add new versions of rego/opa as they are released.
 

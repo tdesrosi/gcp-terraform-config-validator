@@ -48,7 +48,7 @@ violation[{
 
 	# Outdated Gatekeeper format, updating to v1beta1
 	# lib.get_constraint_params(constraint, params)
-	params := input.parameters.spec.parameters
+	params := input.parameters
 
 	# trace(sprintf("params of custom role permissions: %v", [params]))
 

@@ -31,7 +31,7 @@ REGO_IMAGE_TAG := latest
 .PHONY: test
 test: ## Test constraint templates via OPA
 	@echo "Running OPA tests..."
-	@opa test --timeout 30s -v lib/ validator/ --explain=notes
+	@opa test --timeout 30s -v validator/ --explain=notes
 
 .PHONY: docker_test_opa_v15
 docker_test_opa_v15: ## Run tests using CV rego docker image v0.15.x
@@ -69,12 +69,11 @@ docker_test_lint: # Run lint tests using policy tool docker image
 		$(CV_IMAGE_URL)/$(POLICY_TOOL_IMAGE):$(POLICY_TOOL_IMAGE_TAG) \
 		lint \
 		--policies /workspace/policies \
-		--policies /workspace/samples \
-		--libs /workspace/lib
+		--policies /workspace/samples
 
 .PHONY: debug
 debug: ## Show debugging output from OPA
-	@opa eval --data=lib/ --data=validator/ --format=pretty "data.validator.gcp"
+	@opa eval --data=validator/ --format=pretty "data.validator.gcp"
 
 .PHONY: build_templates
 build_templates: ## Inline Rego rules into constraint templates
@@ -82,7 +81,7 @@ build_templates: ## Inline Rego rules into constraint templates
 
 .PHONY: format
 format: ## Format Rego rules
-	@opa fmt -w lib/ validator/
+	@opa fmt -w validator/
 
 .PHONY: build
 build: format build_templates ## Format and build

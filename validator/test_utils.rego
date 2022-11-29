@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ get_test_violations(test_assets, test_constraints, test_template) = violations {
 	# trace(sprintf("test_template: %s", [test_template]))
 	violations := [v |
 		violations := data.templates.gcp[test_template].violation with input.review as test_assets[_]
-			with input.parameters as test_constraints[_]
+			with input.parameters as test_constraints[_].spec.parameters
 
 		v := violations[_]
 	]

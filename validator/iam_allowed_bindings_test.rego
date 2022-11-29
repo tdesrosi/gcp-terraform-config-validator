@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# NOT SUPPORTED: BQ, Dataset, Storage
 
 package templates.gcp.TFGCPIAMAllowedBindingsConstraintV3
 
@@ -54,33 +56,3 @@ test_allowlist_role_domain_violations {
 test_allowlist_role_violation_count {
 	test_utils.check_test_violations_count(fixture_assets, [fixture_constraints.iam_allowed_bindings_allowlist_role_members], template_name, 0)
 }
-
-# NOT SUPPORTED: BQ, Dataset, Storage
-# # Test denylist to BigQuery dataset for gmail.com addresses
-# test_restrict_gmail_bigquery_dataset_violations_count {
-# 	test_utils.check_test_violations_count(fixture_assets, [fixture_constraints.iam_allowed_bindings_denylist_gmail_bigquery_dataset], template_name, 6)
-# }
-# test_restrict_gmail_bigquery_dataset_resources {
-# 	resource_names := {
-# 		"//bigquery.googleapis.com/projects/12345/datasets/testdataset1",
-# 		"//bigquery.googleapis.com/projects/12345/datasets/testdataset3",
-# 		"//bigquery.googleapis.com/projects/12345/datasets/testdataset4",
-# 	}
-# 	test_utils.check_test_violations_resources(fixture_assets, [fixture_constraints.iam_allowed_bindings_denylist_gmail_bigquery_dataset], template_name, resource_names)
-# }
-# # Test denylist to BigQuery dataset for googlegroups.com addresses
-# test_restrict_googlegroups_bigquery_dataset_violations_count {
-# 	test_utils.check_test_violations_count(fixture_assets, [fixture_constraints.iam_allowed_bindings_denylist_googlegroups_bigquery_dataset], template_name, 2)
-# }
-# test_restrict_googlegroups_bigquery_dataset_resources {
-# 	resource_names := {"//bigquery.googleapis.com/projects/12345/datasets/testdataset2"}
-# 	test_utils.check_test_violations_resources(fixture_assets, [fixture_constraints.iam_allowed_bindings_denylist_googlegroups_bigquery_dataset], template_name, resource_names)
-# }
-# # Test denylist to specific BigQuery dataset for gmail.com addresses
-# test_restrict_gmail_specific_bigquery_dataset_violations_count {
-# 	test_utils.check_test_violations_count(fixture_assets, [fixture_constraints.iam_allowed_bindings_denylist_asset_names], template_name, 4)
-# }
-# # Test allowlist to specific BigQuery dataset for gmail.com addresses
-# test_restrict_gmail_specific_bigquery_dataset_violations_count {
-# 	test_utils.check_test_violations_count(fixture_assets, [fixture_constraints.iam_allowed_bindings_allowlist_asset_names], template_name, 0)
-# }

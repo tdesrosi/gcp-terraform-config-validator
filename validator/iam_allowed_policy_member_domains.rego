@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ violation[{
 
 	# Outdated Gatekeeper format, updating to v1beta1
 	# lib.get_constraint_params(constraint, params)
-	params := input.parameters.spec.parameters
+	params := input.parameters
 
 	# Use input.review for TF changes (see schema above)
 	resource := input.review[_]
